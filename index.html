@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đảo Task — Muse đang làm gì cho Hoang</title>
+<style>
+  :root{ --ink:#4a3b32; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;font-family:"Trebuchet MS",Verdana,sans-serif;color:var(--ink)}
+  body{background:linear-gradient(180deg,#aee3f7 0%,#d8f3e3 55%,#fdf6d9 100%);min-height:100vh}
+  .wrap{max-width:980px;margin:0 auto;padding:16px 12px 30px}
+  h1{font-size:23px;margin:4px 0 2px;color:#3f6152;text-shadow:0 1px 0 #fff}
+  .sub{font-size:13px;opacity:.88;margin:0 0 10px;line-height:1.55}
+  .hud{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+  .chip{background:#fffdf4;border:2px solid #7a6a58;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:bold;cursor:pointer;box-shadow:0 2px 0 #7a6a5833}
+  .chip.on{background:#ffe08a}
+  .stat{background:#ffffffd9;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:bold;box-shadow:0 2px 0 #00000010}
+  .stage{position:relative;width:100%;max-width:960px;margin:0 auto;border:5px solid #6d5138;border-radius:20px;overflow:hidden;background:#8fd3ef;box-shadow:0 10px 24px #3f615233, inset 0 0 0 3px #fff8}
+  canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;cursor:pointer}
+  #card{position:absolute;right:10px;bottom:10px;width:312px;max-width:86%;background:#fffef8;border:3px solid #6d5138;border-radius:18px;padding:13px 15px;box-shadow:0 8px 20px #3b2f2f40;display:none}
+  #card.show{display:block}
+  #cardClose{position:absolute;top:7px;right:9px;width:26px;height:26px;border-radius:50%;border:2px solid #6d5138;background:#ffe08a;font-weight:bold;font-size:13px;line-height:1;cursor:pointer;color:#4a3b32}
+  #cardClose:hover{background:#ffb37c}
+  #card h2{font-size:16px;margin:3px 0 4px;line-height:1.25;color:#3f6152}
+  #card p{font-size:13px;margin:4px 0;line-height:1.5}
+  .pill{display:inline-block;font-size:11px;font-weight:bold;border-radius:999px;padding:2px 9px;border:2px solid #6d5138}
+  .live{background:#c9f2c0}.wait{background:#ffe08a}.idle{background:#d3ecff}.done{background:#e7e2ff}
+  #openBtn{margin-top:8px;width:100%;background:#ffb37c;border:2px solid #6d5138;border-radius:12px;padding:9px;font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 3px 0 #6d5138}
+  #openBtn:active{transform:translateY(2px);box-shadow:none}
+  .dot{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #6d5138;vertical-align:-2px;margin-right:6px}
+  #toast{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:#4a3b32;color:#fff;padding:7px 14px;border-radius:999px;font-size:12px;font-weight:bold;display:none;box-shadow:0 4px 10px #0003}
+  .legend{font-size:12px;margin-top:12px;background:#ffffffc9;border-radius:14px;padding:9px 13px;line-height:1.65}
+  table{width:100%;border-collapse:collapse;margin-top:12px;background:#fffef8;border:3px solid #6d5138;border-radius:14px;overflow:hidden;font-size:13px}
+  th,td{padding:7px 9px;border-bottom:1px solid #eee2c6;text-align:left;vertical-align:top}
+  th{background:#e7f4d8;color:#3f6152}
+  tr{cursor:pointer} tr:hover td{background:#fff6d8}
+  .small{font-size:12px;opacity:.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🏝️ Đảo Task — PS1 Animal Crossing</h1>
+  <p class="sub">Mỗi nhân vật là <b>một task Muse đang làm cho bạn</b>. Nhìn vào là biết task nào đang chạy, task nào đang chờ bạn quyết. Bấm vào nhân vật để xem thẻ task + tên cuộc trò chuyện của task đó.<br>
+  <span class="small">Ảnh chụp trạng thái thật lúc <b>14:29, 29/10/2026 (Asia/Saigon)</b> từ Goals/Tracking của bạn — 26 task (mặc định đảo chỉ hiện <b>10 task hằng ngày + task mới</b>; bấm <b>Show all</b> mới hiện hết). Player <b>you</b> (áo teal) đứng ở quảng trường giữa đảo, không phải task.</span></p>
+
+  <div class="hud">
+    <span class="stat">🟢 Đang chạy: 3</span>
+    <span class="stat">🟡 Chờ bạn quyết / làm tiếp: 20</span>
+    <span class="stat">🎣 Đang chờ việc: 1</span>
+    <span class="stat">✅ Đã xong: 2</span>
+    <span style="flex:1"></span>
+    <button class="chip on" data-f="all">Tất cả</button>
+    <button class="chip" data-f="live">Đang chạy</button>
+    <button class="chip" data-f="wait">Chờ bạn</button>
+    <button class="chip" data-f="done">Đã xong</button>
+    <button class="chip" id="showAllBtn" style="background:#ffd6e0">👀 Show all (26)</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <canvas id="cv" width="480" height="270"></canvas>
+    <div id="card"></div>
+    <div id="toast"></div>
+  </div>
+
+  <div class="legend">
+    <b>Đọc đảo:</b> ✨ + đi tới chỗ làm = <b>đang chạy</b> &nbsp;•&nbsp; dấu <b>!</b> + ngồi trước nhà = <b>đang chờ bạn</b> (duyệt / import / chạy snippet / cấp thông tin) &nbsp;•&nbsp; 🎣 = đang chờ việc tiếp theo &nbsp;•&nbsp; 💤 = đã xong, đang “ngủ” ở góc đảo &nbsp;•&nbsp; Ba khách trang trí (không phải task): ⚽ Messi dẫn bóng đi dạo ngẫu nhiên, Doraemon bay chong chóng tre và Goku Super Saiyan bay vòng quanh đảo — bấm vào họ chỉ hiện lời chào vui thôi. Ngày/đêm theo giờ máy của bạn (thử thêm <span class="small">?hour=22</span> vào cuối link) &nbsp;•&nbsp; Phím <b>M</b> tắt tiếng, tiếng chỉ bật sau lần bấm đầu tiên.
+  </div>
+
+  <table id="roster">
+    <thead><tr><th>Nhân vật / Task</th><th>Trạng thái</th><th>Đang làm gì</th><th>Cuộc trò chuyện</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p class="small">Bấm vào một hàng trong bảng cũng chọn nhân vật đó trên đảo. Nút “Mở cuộc trò chuyện” trong thẻ task sẽ copy câu lệnh mở chat — dán vào chat Muse là mình mở đúng cuộc trò chuyện đó lên cho bạn. Với các task chính (Pin, Blog, Coin, Elon/CZ/Trump…), mình có gắn sẵn nút mở chat ngay trong tin nhắn giao đảo này.</p>
+</div>
+
+<script>
+"use strict";
+// ===== Roster: real tracked goals, checked 2026-10-29 14:29 Asia/Saigon =====
+// status: live = new activity now, wait = needs Hoang, idle = waiting quietly, done = completed
+const TASKS = [
+ // CozyWoodLab zone (top-left)
+ {short:"Blog Cozy", tag:"daily", name:"CozyWoodLab daily blog writing", st:"wait", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
+  doing:"Đợt 28/10 đã live 4 bài. Đợt tiếp: chuẩn bị bản nháp 29/10 lúc 14:30, chờ duyệt 16:00. Còn 4 Pin của đợt trước chờ Pinterest đăng nhập lại được.",
+  chat:"Đăng bài blog Cozy", chatId:"bab7e324-8c1b-4a7e-b68e-c3c4cdcbca8d", goal:"goal_63b1a66722a3"},
+ {short:"Clip FB+Pin", tag:"daily", name:"Đăng 10 clip mỗi ngày lên Page Cozywoodlab", st:"wait", color:"#f2cc8f", x:128, y:58, wx:140, wy:88,
+  doing:"10 bài Facebook ngày 29/10 đã hẹn giờ xong. Pin: 14/24 Pin đã hẹn cho 30–31/10, còn 10 Pin kẹt vì Pinterest báo Forbidden khi đăng nhập.",
+  chat:"Schedule Facebook page posts", chatId:"5b8be1ce-8622-4e50-82db-c0c8b7e5b24a", goal:"goal_78155698f5eb"},
+ {short:"Pin Tree Shelf", tag:"daily", name:"Tree Branch Floating Shelf Pinterest account (@treebranchfloatingshelf)", st:"wait", color:"#81b29a", x:176, y:70, wx:188, wy:96,
+  doing:"Lô 100 ảnh chia 20 Pin/ngày (29/10–2/11). Cần bạn xác nhận bản lịch đã import và đủ 100 Pin chưa.",
+  chat:"Pin Tree", chatId:"1d0ea35f-53c1-499d-9dd9-49032c220740", goal:"goal_cc47916b19f4"},
+ {short:"Clone AquaRyn", name:"AquaRyn Etsy product clone for CozyWoodLab", st:"wait", color:"#6fb3d8", x:70, y:112, wx:88, wy:126,
+  doing:"20 sản phẩm test đã live. Chờ bạn duyệt clone tiếp 12 listing còn lại + quyền hosting để up sitemap và sửa CSS ô chọn size.",
+  chat:"Cozywoodlab website", chatId:"3db253fa-114a-49b5-9c73-1c5add117e5c", goal:"goal_1a660516dbf8"},
+ {short:"Clone WoodCraft", name:"WoodCraftByDoan tree shelf clone", st:"wait", color:"#a98467", x:122, y:118, wx:134, wy:130,
+  doing:"Clone thử 10/10 đã live (ID 47–56). Chờ bạn xem và quyết có clone tiếp 20 listing còn lại không.",
+  chat:"Cozywoodlab website", chatId:"3db253fa-114a-49b5-9c73-1c5add117e5c", goal:"goal_4c7fb924d6ca"},
+ {short:"Ảnh Cozy", name:"CozyWoodLab image optimization", st:"idle", color:"#b8b8d8", x:172, y:120, wx:120, wy:196,
+  doing:"Audit xong: 269 file, không CDN. Test nén JPG gần như không tiết kiệm vì CMS tự hạ xuống 1200×1200. Đang chờ xác minh banner + ảnh Blog nào còn được dùng trước khi thay.",
+  chat:"Cozywoodlab website", chatId:"3db253fa-114a-49b5-9c73-1c5add117e5c", goal:"goal_3d6283236f6d"},
+ // Watch zone (bottom-left, by the pond/clock)
+ {short:"Giá 12 Coin", tag:"daily", name:"Theo dõi giá 12 coin qua WhatsApp", st:"live", color:"#ffd166", x:66, y:178, wx:84, wy:168,
+  doing:"Vừa cảnh báo WALRUS lúc 13:35 hôm nay. Bản tin giá tiếp theo lúc 16:00. Chạy 4 bản tin/ngày (06:00, 12:00, 16:00, 21:00) + quét cảnh báo mỗi 30 phút.",
+  chat:"WhatsApp CoinGecko price alerts", chatId:"e9b18664-8e99-49f1-8b45-1da81e4779a1", goal:"goal_6037c097ca56"},
+ {short:"Elon·CZ·Trump", tag:"daily", name:"Theo dõi bài mới của Elon Musk, CZ (X) và Trump (Truth Social)", st:"live", color:"#ef476f", x:118, y:186, wx:132, wy:170,
+  doing:"Elon có bài mới lúc 11:37 ngày 29/10. CZ chưa có bài mới. Truth Social vẫn chưa đọc được nên bài của Trump sẽ được báo bù sau.",
+  chat:"Track X and Truth Social updates", chatId:"3d621c05-65b9-4e0d-bf35-e0ba1aa95312", goal:"goal_bf92d84d93c2"},
+ // CraftNameSign zone (top-right)
+ {short:"Pin CraftName", tag:"new", name:"CraftNameSign Pinterest short-link Pins", st:"wait", color:"#e76f51", x:308, y:60, wx:322, wy:88,
+  doing:"Tạm dừng tới mai theo lời bạn tối 29/10: còn 10 Pin (2 lỗi upload, 1 đã có nháp, 7 chưa làm). Bulk upload tài khoản mới lỗi + cần file WordPress Export để dựng lại link đích đầy đủ.",
+  chat:"CSV auto upload for Pinterest and Facebook", chatId:"d3168514-c523-403b-823b-e796304b79b7", goal:"goal_b92c2314ee70"},
+ {short:"Tách Category", tag:"new", name:"CraftNameSign subcategory split (17 → 95 category con)", st:"wait", color:"#2a9d8f", x:360, y:56, wx:372, wy:84,
+  doing:"File đầy đủ 6.722 sản phẩm cha đã giao (test 20 dòng import thành công). Chờ bạn import file full.",
+  chat:"Web Craftnamesign", chatId:"9e3fbab2-7763-4958-ac04-eb6ef75103f2", goal:"goal_a3529fe4ec21"},
+ {short:"Clone Catalog", name:"CraftNameSign catalog clone", st:"wait", color:"#e9c46a", x:412, y:66, wx:420, wy:92,
+  doing:"17 category đã verify live, báo cáo upload đã giao. Category Tree Branch trống đã sẵn sàng để bạn xoá.",
+  chat:"Web Craftnamesign", chatId:"9e3fbab2-7763-4958-ac04-eb6ef75103f2", goal:"goal_184fb1da10dd"},
+ {short:"JSON Chung", name:"CraftNameSign shared JSON product groups + 143 reupload", st:"wait", color:"#f4a261", x:316, y:112, wx:330, wy:126,
+  doing:"File trả category cho 144 sản phẩm reupload đã giao, chờ bạn import. Việc xoá sản phẩm cũ còn chờ khôi phục wp-admin (recovery mode).",
+  chat:"Web Craftnamesign", chatId:"9e3fbab2-7763-4958-ac04-eb6ef75103f2", goal:"goal_2cb720a3a2ea"},
+ {short:"Video Gallery", name:"CraftNameSign production video for categories", st:"wait", color:"#9b5de5", x:368, y:118, wx:380, wy:130,
+  doing:"Tab Video đã live trên 1.166 sản phẩm. Đang thử nghiệm plugin Video Gallery for WooCommerce trên 1 sản phẩm để có slide video thật trong gallery.",
+  chat:"Web Craftnamesign", chatId:"9e3fbab2-7763-4958-ac04-eb6ef75103f2", goal:"goal_2d7b973d43d3"},
+ // Glowneon / Lynseriess zone (bottom-right)
+ {short:"Cây Glowneon", name:"Glowneonstore Tree Bookshelf category cleanup", st:"wait", color:"#588157", x:300, y:182, wx:314, wy:168,
+  doing:"Phân loại lại đã xong và verify live (5.886/6.100 sản phẩm cha). Chờ bạn kiểm tra số đếm trong WP Admin và export bổ sung ~614 sản phẩm Simple bị sót.",
+  chat:"Web Glow Neon Store", chatId:"f59b04ba-b9a5-4f10-b1ca-b8ad0e323ca9", goal:"goal_d7b5d2b4b736"},
+ {short:"ChatGPT Ads", name:"ChatGPT Ads launch kit for Glowneonstore", st:"wait", color:"#4cc9f0", x:350, y:190, wx:362, wy:172,
+  doing:"Bộ kit xong: feed 511 sản phẩm + 18 mẫu quảng cáo, PDF pastel đã chốt. Tạm dừng ở bước đăng nhập OpenAI — chờ thông tin LLC của bạn (tên pháp lý, bang, EIN, thẻ US).",
+  chat:"ChatGPT ads plan", chatId:"41cf4c61-41fa-4c13-8079-92e62400cd22", goal:"goal_c8bbcba553ba"},
+ {short:"Video PMax", name:"PMax ad video sets", st:"wait", color:"#ff8fa3", x:402, y:184, wx:412, wy:168,
+  doing:"4 bộ video đã giao (tree bookshelf, bar tables, cat tree…). Chờ bạn upload lên YouTube và gắn vào PMax asset group.",
+  chat:"Create Google Performance Max video ads", chatId:"95ff2c07-940b-4d8f-aed6-755633b1c98f", goal:"goal_edc4aa87822a"},
+ {short:"Cột Garden", name:"Garden Metal Column title rewrite and duplicate cleanup (lynseriess)", st:"wait", color:"#bc6c25", x:282, y:224, wx:296, wy:206,
+  doing:"Viết lại tiêu đề 600 sản phẩm + báo cáo trùng lặp xong. Snippet xoá 273 bản trùng đã sẵn sàng — chờ bạn backup và chạy, và chốt 'New York Brooklyn' là Knicks hay Nets.",
+  chat:"Web Lynseriess", chatId:"915487c7-0c1a-4367-aeee-4793000ebb28", goal:"goal_917940605fbe"},
+ {short:"Panel Garden", name:"Metal Garden Panel title rewrite and duplicate cleanup (lynseriess)", st:"wait", color:"#dda15e", x:336, y:228, wx:348, wy:208,
+  doing:"971 sản phẩm → 511 tiêu đề duy nhất. Bộ xoá trùng (460 vào trash) đã sẵn sàng, chờ chạy snippet cho 3 sản phẩm Brooklyn Nets còn sót.",
+  chat:"Web Lynseriess", chatId:"915487c7-0c1a-4367-aeee-4793000ebb28", goal:"goal_c079f27497a5"},
+ {short:"Panel Tường", name:"Metal Wall Panel title rewrite (lynseriess)", st:"wait", color:"#606c38", x:392, y:226, wx:402, wy:208,
+  doing:"827 tiêu đề đã viết lại, còn 495 tiêu đề duy nhất. Chờ bạn chạy snippet xoá v2 theo lô (332 ID).",
+  chat:"Web Lynseriess", chatId:"915487c7-0c1a-4367-aeee-4793000ebb28", goal:"goal_f34886544232"},
+ {short:"Ảnh Spry Warm", name:"Spry Warm lifestyle imagery", st:"wait", color:"#ffb703", x:434, y:214, wx:428, wy:196,
+  doing:"Đã giao nhiều bộ ảnh lifestyle. Bộ kệ cây: 2 ảnh rộng bị sai 6 tầng thay vì 5 — bản làm lại đang chờ bạn quyết.",
+  chat:"Identify Spry Warm style", chatId:"3e86420a-b878-43d1-bd4c-6da0e75c9d0f", goal:"goal_1f83fb96fba4"},
+ // Misc / center
+ {short:"Đảo Task", tag:"new", name:"Botvillage / Đảo Task (task này)", st:"live", color:"#118ab2", x:292, y:140, wx:278, wy:154,
+  doing:"Chính là đảo bạn đang xem — vừa dựng xong bản đầu với 26 nhân vật-task theo trạng thái thật hôm nay.",
+  chat:"Build botvillage live island", chatId:"fddfe7b7-0411-4b14-b756-2be656dcf0be", goal:""},
+ {short:"BodyJourney", tag:"new", name:"BodyJourney YouTube Shorts channel", st:"wait", color:"#06d6a0", x:292, y:82, wx:280, wy:100,
+  doing:"Đã giao branding kênh + caption cho 10 Shorts. Chờ bạn tạo kênh BodyJourney và upload video.",
+  chat:"Kênh nội tạng", chatId:"71d20604-48a9-407f-9d11-b947df68d5d2", goal:"goal_62a3c18bb30d"},
+ {short:"Truy Nguồn Clip", tag:"new", name:"EthanWoodArt clip source identification", st:"wait", color:"#8d99ae", x:206, y:196, wx:220, wy:182,
+  doing:"Đang truy nguồn gốc các clip gỗ (kênh này là repost từ nhiều xưởng Trung Quốc). Chờ tìm trong app Douyin chữ 宗仔工艺 để chốt tài khoản gốc của clip 124–125.",
+  chat:"Download YouTube shorts to Drive", chatId:"31d25817-3e33-4698-ba25-09c9a47bed98", goal:"goal_81d228255a1b"},
+ {short:"Báo Cáo Tháng", name:"October 2026 work report", st:"wait", color:"#c77dff", x:252, y:224, wx:262, wy:206,
+  doing:"Bảng công việc tháng 10 đã soạn (6 dòng + sản xuất video). Chờ bạn quyết có thêm các task nhỏ còn lại thành dòng riêng không.",
+  chat:"Báo cáo tháng", chatId:"eb698eff-9f86-4e94-af73-754e86b68d8d", goal:"goal_e565fec69e3d"},
+ // Done corner
+ {short:"Drive Ethan ✓", name:"EthanWoodArt Shorts Drive archive", st:"done", color:"#adb5bd", x:52, y:238, wx:52, wy:238,
+  doing:"Đã xong: link Drive đủ 285 Shorts đã giao ngày 27/10.",
+  chat:"Download YouTube shorts to Drive", chatId:"31d25817-3e33-4698-ba25-09c9a47bed98", goal:"goal_fcbc05c5b256"},
+ {short:"White-fill ✓", name:"Lynseriess white-fill panel image fixes", st:"done", color:"#adb5bd", x:92, y:244, wx:92, wy:244,
+  doing:"Đã xong 25/10: bạn tự xử lý 5 panel white-fill còn lại, Muse không cần làm thêm.",
+  chat:"Web Lynseriess", chatId:"915487c7-0c1a-4367-aeee-4793000ebb28", goal:"goal_f97b6b939be1"},
+];
+const STXT = {live:["Đang chạy","live"], wait:["Chờ bạn","wait"], idle:["Đang chờ việc","idle"], done:["Đã xong","done"]};
+const CHATTER = {live:["ping!","có tin mới!","đang làm nè!"], wait:["chờ bạn đó!","duyệt giúp mình?","mình sẵn sàng rồi!"], idle:["thong thả thôi…","chờ việc tiếp…"], done:["xong rồi ✓","ngủ ngon…"]};
+
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+let filter = 'all', selected = null, t0 = performance.now();
+let showAll = false;
+let lastNow = performance.now();
+const messi = {x:170, y:170, tx:300, ty:120, pause:0, face:1};
+function vis(tk){ return showAll || !!tk.tag; }
+function shown(tk){ return filter!=='all' ? tk.st===filter : vis(tk); }
+let audio = null, muted = false;
+function blip(f){ if(muted) return; try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)();
+  const o=audio.createOscillator(), g=audio.createGain(); o.type='square'; o.frequency.value=f||660;
+  g.gain.setValueAtTime(.06,audio.currentTime); g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.12);
+  o.connect(g).connect(audio.destination); o.start(); o.stop(audio.currentTime+.13);}catch(e){} }
+addEventListener('keydown', e=>{ if(e.key==='m'||e.key==='M'){ muted=!muted; toast(muted?'🔇 Đã tắt tiếng':'🔊 Đã bật tiếng'); }
+  if(e.key==='Escape'){ selected=null; document.getElementById('card').classList.remove('show'); } });
+
+function hourNow(){ const q = new URLSearchParams(location.search).get('hour'); if(q!==null) return +q; return new Date().getHours(); }
+function isNight(h){ return h>=19 || h<6; }
+
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+
+function hash(n){ const x = Math.sin(n*127.1)*43758.5453; return x - Math.floor(x); }
+function drawTree(x,y,kind,tt,night){
+  const sw = Math.sin(tt*1.1+x*0.7)*1.1;
+  ctx.fillStyle='#00000018'; ctx.beginPath(); ctx.ellipse(x,y+10,11,3.5,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#9a6a3f'; ctx.fillRect(x-2.5,y,5,10);
+  if(kind===2){ // pine
+    ctx.fillStyle = night? '#2c6e4c':'#3f9e63';
+    for(let i=0;i<3;i++){ const w=20-i*5, yy=y+3-i*8; ctx.beginPath(); ctx.moveTo(x-w/2+sw*(i+1)*.3,yy); ctx.lineTo(x+sw*(i+1)*.3,yy-11); ctx.lineTo(x+w/2+sw*(i+1)*.3,yy); ctx.closePath(); ctx.fill(); }
+  } else {
+    ctx.fillStyle = night? '#2e7d52':'#57b06d'; ctx.beginPath(); ctx.arc(x+sw,y-8,12,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = night? '#37996a':'#6fbf82'; ctx.beginPath(); ctx.arc(x-8+sw,y-3,8,0,Math.PI*2); ctx.arc(x+8+sw,y-3,8,0,Math.PI*2); ctx.fill();
+    if(kind===1){ ctx.fillStyle='#ff6b5e'; for(let i=0;i<4;i++){ const a=hash(x+i)*6.28; ctx.beginPath(); ctx.arc(x+sw+Math.cos(a)*7,y-7+Math.sin(a)*6,2.2,0,Math.PI*2); ctx.fill(); } }
+  }
+}
+function drawGround(h){
+  const night = isNight(h), tt = (performance.now()-t0)/1000;
+  // water + animated wave dashes
+  ctx.fillStyle = night ? '#274b73' : '#8fd3ef'; ctx.fillRect(0,0,480,270);
+  ctx.strokeStyle = night? '#ffffff22':'#ffffff88'; ctx.lineWidth=1.4;
+  for(let i=0;i<22;i++){ const y=14+((i*53)%250), x=((i*89 + tt*(6+(i%3)*3))%520)-20;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.quadraticCurveTo(x+6,y-2.5,x+12,y); ctx.quadraticCurveTo(x+18,y+2.5,x+24,y); ctx.stroke(); }
+  // sun / moon + clouds or stars
+  if(night){ ctx.fillStyle='#fffbe6'; for(let i=0;i<30;i++){ ctx.globalAlpha=.5+hash(i)*.5; ctx.fillRect((i*67)%480,(i*37)%76,2,2);} ctx.globalAlpha=1;
+    ctx.fillStyle='#f7ead7'; ctx.beginPath(); ctx.arc(438,26,11,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#274b73'; ctx.beginPath(); ctx.arc(433,22,9,0,Math.PI*2); ctx.fill(); }
+  else { ctx.fillStyle='#fff3a0'; ctx.beginPath(); ctx.arc(438,26,15,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffdf6b'; ctx.beginPath(); ctx.arc(438,26,12,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffffffd9';
+    for(const c of [[70,20,1],[210,12,.7],[340,34,.85]]){ const cx=((c[0]+tt*5*c[2])%540)-30, cy=c[1], sc=c[2];
+      ctx.beginPath(); ctx.ellipse(cx,cy,17*sc,7*sc,0,0,Math.PI*2); ctx.ellipse(cx+12*sc,cy+1,12*sc,5.5*sc,0,0,Math.PI*2); ctx.ellipse(cx-13*sc,cy+1.5,11*sc,5*sc,0,0,Math.PI*2); ctx.fill(); } }
+  // sand rim + grass island
+  ctx.fillStyle = night ? '#b3a67e' : '#f7e7b4'; ctx.beginPath(); ctx.ellipse(240,144,234,124,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = night ? '#3a7a56' : '#96d68f'; ctx.beginPath(); ctx.ellipse(240,142,226,117,0,0,Math.PI*2); ctx.fill();
+  // Animal-Crossing style mow diamonds, clipped to grass
+  ctx.save(); ctx.beginPath(); ctx.ellipse(240,142,226,117,0,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle = night? '#ffffff09':'#ffffff20';
+  for(let gy=0; gy<16; gy++) for(let gx=0; gx<30; gx++){ if((gx+gy)%2) continue; const x=gx*17+(gy%2)*8, y=gy*17+8;
+    ctx.beginPath(); ctx.moveTo(x,y-7); ctx.lineTo(x+8,y); ctx.lineTo(x,y+7); ctx.lineTo(x-8,y); ctx.closePath(); ctx.fill(); }
+  // dirt paths plaza -> zones
+  ctx.strokeStyle = night? '#9a8a64':'#eedca6'; ctx.lineWidth=11; ctx.lineCap='round';
+  for(const [x,y] of [[120,90],[365,90],[105,192],[362,200],[240,100]]){ ctx.beginPath(); ctx.moveTo(240,150); ctx.quadraticCurveTo((240+x)/2+8,(150+y)/2,x,y); ctx.stroke(); }
+  ctx.fillStyle = night ? '#8a7f63' : '#f0dfae'; ctx.beginPath(); ctx.ellipse(240,150,46,27,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#d9c184'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(240,150,36,20,0,0,Math.PI*2); ctx.stroke();
+  // flowers + grass tufts (deterministic scatter)
+  const fcols=['#ff9fb2','#ffd66e','#ffffff','#ffb37c'];
+  for(let i=0;i<70;i++){ const a=hash(i*3+1)*6.28, r=Math.sqrt(hash(i*7+2))*.94;
+    const x=240+Math.cos(a)*r*218, y=142+Math.sin(a)*r*108; if(Math.hypot(x-240,(y-150)*1.8)<52) continue;
+    if(i%3===0){ ctx.strokeStyle= night?'#2c6e4c':'#4da763'; ctx.lineWidth=1.2; ctx.beginPath();
+      ctx.moveTo(x,y); ctx.lineTo(x-2,y-4); ctx.moveTo(x,y); ctx.lineTo(x+2,y-4.5); ctx.stroke(); }
+    else { const c=fcols[i%4]; ctx.fillStyle=c;
+      for(let pt=0;pt<4;pt++){ const pa=pt*Math.PI/2+.6; ctx.beginPath(); ctx.arc(x+Math.cos(pa)*2,y+Math.sin(pa)*2,1.7,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle='#ffdf6b'; ctx.beginPath(); ctx.arc(x,y,1.5,0,Math.PI*2); ctx.fill(); } }
+  // pond with lily pads
+  ctx.fillStyle = night ? '#2d5a80' : '#aee7ff'; ctx.beginPath(); ctx.ellipse(105,206,54,23,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#f7e7b4'; ctx.lineWidth=3; ctx.stroke();
+  ctx.fillStyle='#57b06d'; ctx.beginPath(); ctx.arc(84,200,5.5,0,Math.PI*2); ctx.arc(126,212,4.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#ff9fb2'; ctx.beginPath(); ctx.arc(84,199,2.2,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  // trees around edges
+  const trees=[[34,52,1],[452,50,2],[30,142,0],[454,132,1],[238,34,2],[196,248,0],[292,38,1],[52,96,2],[428,96,0]];
+  for(const [x,y,k] of trees) drawTree(x,y,k,tt,night);
+  // butterflies (day only)
+  if(!night){ for(const b of [[176,138],[306,118]]){ const bx=b[0]+Math.sin(tt*.8+b[0])*10, by=b[1]+Math.cos(tt*1.3+b[1])*6, fl=Math.sin(tt*14)*2.4;
+      ctx.fillStyle='#c77dff'; ctx.beginPath(); ctx.ellipse(bx-2.4,by,2.6,1.8+Math.abs(fl)*.4,-.5,0,Math.PI*2); ctx.ellipse(bx+2.4,by,2.6,1.8+Math.abs(fl)*.4,.5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#4a3b32'; ctx.fillRect(bx-.6,by-2,1.2,4); } }
+}
+
+function drawHome(tk){
+  const x=tk.x, y=tk.y, night=isNight(hourNow());
+  ctx.fillStyle='#00000018'; ctx.beginPath(); ctx.ellipse(x,y+13,17,4,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#8a5a34'; ctx.fillRect(x+8,y-13,5,8); // chimney
+  const puff=(performance.now()/900 + x)%3; ctx.fillStyle='#ffffff90'; ctx.beginPath(); ctx.arc(x+10.5,y-16-puff*2.5,2.6+puff,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff6e3'; rr(x-14,y-5,28,18,3); ctx.fill(); // walls
+  ctx.strokeStyle='#d9c9a8'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle=tk.color; ctx.beginPath(); ctx.moveTo(x-18,y-5); ctx.lineTo(x,y-18); ctx.lineTo(x+18,y-5); ctx.closePath(); ctx.fill(); // roof
+  ctx.strokeStyle='#ffffffaa'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(x-18,y-5); ctx.lineTo(x,y-18); ctx.lineTo(x+18,y-5); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x,y-14.5,2.4,0,Math.PI*2); ctx.fill(); // roof jewel
+  ctx.fillStyle='#8a5a34'; rr(x-4,y+3,8,10,3.5); ctx.fill(); // door
+  ctx.fillStyle='#ffdf6b'; ctx.fillRect(x+1.5,y+7.5,1.8,1.8);
+  ctx.fillStyle= night? '#ffd66e':'#bfe6f5'; ctx.fillRect(x+6.5,y+0.5,6,6); // window
+  ctx.strokeStyle='#8a5a34'; ctx.lineWidth=1; ctx.strokeRect(x+6.5,y+0.5,6,6);
+  ctx.beginPath(); ctx.moveTo(x+9.5,y+0.5); ctx.lineTo(x+9.5,y+6.5); ctx.moveTo(x+6.5,y+3.5); ctx.lineTo(x+12.5,y+3.5); ctx.stroke();
+}
+function pill(text,x,y){
+  ctx.font='bold 7px monospace'; const w=ctx.measureText(text).width+8;
+  ctx.fillStyle='#fffdf4ee'; rr(x-w/2,y-7,w,10,5); ctx.fill(); ctx.strokeStyle='#3b2f2f'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle='#3b2f2f'; ctx.textAlign='center'; ctx.fillText(text,x,y+1);
+}
+function bubble(text,x,y){
+  ctx.font='bold 8px "Trebuchet MS",sans-serif'; const w=ctx.measureText(text).width+10;
+  ctx.fillStyle='#ffffff'; rr(x-w/2,y-16,w,13,6); ctx.fill(); ctx.strokeStyle='#3b2f2f'; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x-3,y-3); ctx.lineTo(x+3,y-3); ctx.lineTo(x,y+2); ctx.closePath(); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#3b2f2f'; ctx.textAlign='center'; ctx.fillText(text,x,y-6);
+}
+function villager(x,y,color,opts){
+  const bob = opts.bob||0, type = opts.type||0;
+  ctx.fillStyle='#00000020'; ctx.beginPath(); ctx.ellipse(x,y+14,9,3.2,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#6d5138'; // feet
+  ctx.beginPath(); ctx.ellipse(x-4,y+13+(opts.swing?Math.sin(bob*3)*1:0),3,1.8,0,0,Math.PI*2); ctx.ellipse(x+4,y+13-(opts.swing?Math.sin(bob*3)*1:0),3,1.8,0,0,Math.PI*2); ctx.fill();
+  const armSwing = opts.swing? Math.sin(bob*3)*2 : 0;
+  ctx.fillStyle=color; // arms
+  ctx.beginPath(); ctx.ellipse(x-8,y+6+armSwing,3,4.4,.5,0,Math.PI*2); ctx.ellipse(x+8,y+6-armSwing,3,4.4,-.5,0,Math.PI*2); ctx.fill();
+  rr(x-7,y+1+bob,14,11,5); ctx.fill(); // body
+  ctx.fillStyle='#ffffff55'; ctx.beginPath(); ctx.ellipse(x,y+8+bob,4.4,3.2,0,0,Math.PI*2); ctx.fill(); // belly
+  // ears by type: 0 cat, 1 bear, 2 bunny — ear colour = body colour
+  ctx.fillStyle=color;
+  if(type===0){ for(const sgn of [-1,1]){ ctx.beginPath(); ctx.moveTo(x+sgn*3.4,y-11+bob); ctx.lineTo(x+sgn*7.6,y-16.5+bob); ctx.lineTo(x+sgn*8.2,y-9.5+bob); ctx.closePath(); ctx.fill(); } }
+  else if(type===1){ for(const sgn of [-1,1]){ ctx.beginPath(); ctx.arc(x+sgn*6.8,y-11.5+bob,3.1,0,Math.PI*2); ctx.fill(); } 
+    ctx.fillStyle='#ffd9b3'; for(const sgn of [-1,1]){ ctx.beginPath(); ctx.arc(x+sgn*6.8,y-11.5+bob,1.5,0,Math.PI*2); ctx.fill(); } }
+  else { for(const sgn of [-1,1]){ ctx.beginPath(); ctx.ellipse(x+sgn*4.6,y-15.5+bob,2.4,5.6,sgn*.22,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle='#ffc9d4'; for(const sgn of [-1,1]){ ctx.beginPath(); ctx.ellipse(x+sgn*4.6,y-15.5+bob,1.1,3.4,sgn*.22,0,Math.PI*2); ctx.fill(); } }
+  ctx.fillStyle='#ffe0bd'; ctx.beginPath(); ctx.arc(x,y-5+bob,8.6,0,Math.PI*2); ctx.fill(); // head
+  ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y-9.6+bob,8.2,Math.PI*1.08,Math.PI*1.92); ctx.closePath(); ctx.fill(); // fur cap
+  ctx.fillStyle='#2b211c'; ctx.beginPath(); ctx.arc(x-3.2,y-4.6+bob,1.25,0,Math.PI*2); ctx.arc(x+3.2,y-4.6+bob,1.25,0,Math.PI*2); ctx.fill(); // eyes
+  ctx.fillStyle='#fff'; ctx.fillRect(x-3.7,y-5.5+bob,1,1); ctx.fillRect(x+2.7,y-5.5+bob,1,1);
+  ctx.fillStyle='#ffb3a0aa'; ctx.beginPath(); ctx.arc(x-5.6,y-2.2+bob,1.9,0,Math.PI*2); ctx.arc(x+5.6,y-2.2+bob,1.9,0,Math.PI*2); ctx.fill(); // cheeks
+  ctx.strokeStyle='#8a5a34'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(x,y-2.4+bob,1.7,.25*Math.PI,.75*Math.PI); ctx.stroke(); // mouth
+  if(opts.tool) { ctx.font='11px sans-serif'; ctx.textAlign='center'; ctx.fillText(opts.tool,x+13,y+1+bob); }
+  if(opts.fish) { ctx.strokeStyle='#6b4226'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x+7,y+6); ctx.lineTo(x+22,y-3); ctx.stroke();
+    ctx.strokeStyle='#ffffffcc'; ctx.beginPath(); ctx.moveTo(x+22,y-3); ctx.lineTo(x+22,y+9); ctx.stroke();
+    ctx.fillStyle='#ff8fa3'; ctx.beginPath(); ctx.arc(x+22,y+9,1.8,0,Math.PI*2); ctx.fill(); }
+}
+const MAIN = {doorX:240, doorY:142};
+function posOf(tk,tt){
+  let base;
+  if(tk.st==='live'){ const cyc = (tt*0.14 + tk.x*0.01) % 2; const q = cyc<1 ? cyc : 2-cyc;
+    base = [ tk.x+(tk.wx-tk.x)*q, tk.y+(tk.wy-tk.y)*q ]; }
+  else if(tk.st==='idle') base = [tk.wx, tk.wy];
+  else base = [tk.x, tk.y+14];
+  if(tk.st==='done') return [base[0], base[1], 'sleep'];
+  const CYC = 30, off = (tk.x*7 + tk.y*3) % CYC, ph = (tt + off) % CYC;
+  const ease = t => t*t*(3-2*t);
+  const doorX = MAIN.doorX + ((tk.x*13) % 25) - 12;
+  if(ph < 19) return [base[0], base[1], tk.st==='live' ? 'work' : (tk.st==='idle' ? 'fish' : 'home')];
+  if(ph < 23){ const q = ease((ph-19)/4); return [ base[0]+(doorX-base[0])*q, base[1]+(MAIN.doorY-base[1])*q, 'run' ]; }
+  if(ph < 25) return [doorX, MAIN.doorY+2, 'fetch'];
+  if(ph < 29){ const q = ease((ph-25)/4); return [ doorX+(base[0]-doorX)*q, MAIN.doorY+(base[1]-MAIN.doorY)*q, 'back' ]; }
+  return [base[0], base[1], 'home'];
+}
+
+function drawMainHouse(){
+  const x=240, y=116, night=isNight(hourNow());
+  ctx.fillStyle='#00000020'; ctx.beginPath(); ctx.ellipse(x,y+17,30,6,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#8a5a34'; ctx.fillRect(x+14,y-24,7,11);
+  const puff=(performance.now()/900)%3; ctx.fillStyle='#ffffff90'; ctx.beginPath(); ctx.arc(x+17.5,y-27-puff*2.5,3+puff,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff3da'; rr(x-24,y-12,48,29,4); ctx.fill();
+  ctx.strokeStyle='#d9c9a8'; ctx.lineWidth=1.2; ctx.stroke();
+  ctx.fillStyle='#b5533c'; ctx.beginPath(); ctx.moveTo(x-29,y-12); ctx.lineTo(x,y-31); ctx.lineTo(x+29,y-12); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#ffffffaa'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(x-29,y-12); ctx.lineTo(x,y-31); ctx.lineTo(x+29,y-12); ctx.stroke();
+  ctx.fillStyle='#7a4a26'; rr(x-6,y+3,12,14,5); ctx.fill();
+  ctx.fillStyle='#ffdf6b'; ctx.fillRect(x+2.5,y+9,2.2,2.2);
+  ctx.fillStyle= night? '#ffd66e':'#bfe6f5';
+  ctx.fillRect(x-19,y-4,9,9); ctx.fillRect(x+10,y-4,9,9);
+  ctx.strokeStyle='#8a5a34'; ctx.lineWidth=1; ctx.strokeRect(x-19,y-4,9,9); ctx.strokeRect(x+10,y-4,9,9);
+  pill('🏠 Main Chat', x, y-40);
+}
+
+function doraPos(tt){ const a = tt*0.25; return [240+Math.cos(a)*186, 116+Math.sin(a)*66, -Math.sin(a)]; }
+function gokuPos(tt){ return [240+Math.sin(tt*0.42)*198, 108+Math.sin(tt*0.84)*56, Math.cos(tt*0.42)]; }
+function pickMessiTarget(){
+  for(let i=0;i<20;i++){ const a=Math.random()*6.28, r=Math.sqrt(Math.random())*.92;
+    const x=240+Math.cos(a)*r*205, y=144+Math.sin(a)*r*98;
+    if(Math.hypot(x-105,y-206)<62) continue;               // pond
+    if(Math.hypot(x-240,(y-128)*1.4)<52) continue;          // main house / plaza
+    messi.tx=x; messi.ty=y; return; }
+  messi.tx=170; messi.ty=170;
+}
+function drawMessi(tt, dt){
+  if(messi.pause>0){ messi.pause-=dt; }
+  else {
+    const dx=messi.tx-messi.x, dy=messi.ty-messi.y, d=Math.hypot(dx,dy);
+    if(d<4){ pickMessiTarget(); messi.pause=.7+Math.random()*1.4; }
+    else { const sp=17*dt; messi.x+=dx/d*sp; messi.y+=dy/d*sp; messi.face = dx>=0?1:-1; }
+  }
+  const x=messi.x, y=messi.y, moving = messi.pause<=0;
+  const bob = moving? Math.abs(Math.sin(tt*9))*1.8 : Math.sin(tt*1.8)*.6;
+  const bx = x + messi.face*11, by = y+12 - (moving? Math.abs(Math.sin(tt*9))*2.4 : 0); // ball ahead
+  ctx.fillStyle='#00000020'; ctx.beginPath(); ctx.ellipse(bx,by+3.5,4,1.6,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(bx,by,3.6,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(bx-.8,by-.8,1.1,0,Math.PI*2); ctx.arc(bx+1.4,by+1.2,1,0,Math.PI*2); ctx.arc(bx+1.2,by-1.6,.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#00000020'; ctx.beginPath(); ctx.ellipse(x,y+14,9,3.2,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#3b2f2f'; ctx.beginPath(); ctx.ellipse(x-4,y+13,3,1.8,0,0,Math.PI*2); ctx.ellipse(x+4,y+13,3,1.8,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#aee2ff'; rr(x-7,y+1+bob,14,11,5); ctx.fill();              // Argentina jersey
+  ctx.fillStyle='#ffffff'; ctx.fillRect(x-3.5,y+1+bob,2.6,11); ctx.fillRect(x+1.4,y+1+bob,2.6,11);
+  ctx.fillStyle='#ffe0bd'; ctx.beginPath(); ctx.arc(x,y-5+bob,8.6,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#4a2f22'; ctx.beginPath(); ctx.arc(x,y-9.2+bob,8.3,Math.PI*1.05,Math.PI*1.95); ctx.closePath(); ctx.fill(); // dark hair
+  ctx.fillStyle='#2b211c'; ctx.beginPath(); ctx.arc(x-3+messi.face,y-4.6+bob,1.25,0,Math.PI*2); ctx.arc(x+3+messi.face,y-4.6+bob,1.25,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#ffb3a0aa'; ctx.beginPath(); ctx.arc(x-5.6,y-2.2+bob,1.9,0,Math.PI*2); ctx.arc(x+5.6,y-2.2+bob,1.9,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; rr(x-8,y+16,17,8,4); ctx.fill(); ctx.strokeStyle='#3b2f2f'; ctx.lineWidth=.8; ctx.stroke();   // #10 tag
+  ctx.fillStyle='#1280c8'; ctx.font='bold 6px monospace'; ctx.textAlign='center'; ctx.fillText('MESSI 10', x, y+22.5);
+  pill('Messi', x, y-24+bob);
+}
+function drawDoraemon(tt){
+  const [x,y,vx] = doraPos(tt); const bob = Math.sin(tt*2.2)*2, f = vx>=0?1:-1;
+  ctx.fillStyle='#00000016'; ctx.beginPath(); ctx.ellipse(x,Math.min(y+56,256),10,3,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#8a5a34'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(x,y-24+bob); ctx.lineTo(x,y-19+bob); ctx.stroke(); // copter stem
+  const pa = tt*28; ctx.strokeStyle='#f4a261'; ctx.lineWidth=2.4;                              // bamboo copter blades
+  ctx.beginPath(); ctx.moveTo(x-Math.cos(pa)*9, y-24.5+bob-Math.sin(pa)*1.6); ctx.lineTo(x+Math.cos(pa)*9, y-24.5+bob+Math.sin(pa)*1.6); ctx.stroke();
+  ctx.fillStyle='#3fa7e0'; ctx.beginPath(); ctx.ellipse(x-9,y+6+bob,3.4,2.4,-.6,0,Math.PI*2); ctx.ellipse(x+9,y+6+bob,3.4,2.4,.6,0,Math.PI*2); ctx.fill(); // arms
+  ctx.beginPath(); ctx.arc(x,y+4+bob,8.6,0,Math.PI*2); ctx.fill();                              // body
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x,y+6+bob,5.4,4.6,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x-4,y+12+bob,3.6,2.2,0,0,Math.PI*2); ctx.ellipse(x+4,y+12+bob,3.6,2.2,0,0,Math.PI*2); ctx.fill(); // feet
+  ctx.fillStyle='#3fa7e0'; ctx.beginPath(); ctx.arc(x,y-8+bob,10.6,0,Math.PI*2); ctx.fill();     // head
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x,y-5.6+bob,8.2,7,0,0,Math.PI*2); ctx.fill(); // face
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x-3,y-11+bob,2.1,3,0,0,Math.PI*2); ctx.ellipse(x+3,y-11+bob,2.1,3,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(x-3+f*.7,y-10.6+bob,1.1,0,Math.PI*2); ctx.arc(x+3+f*.7,y-10.6+bob,1.1,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#e63946'; ctx.beginPath(); ctx.arc(x,y-8.2+bob,1.9,0,Math.PI*2); ctx.fill();   // nose
+  ctx.strokeStyle='#555'; ctx.lineWidth=.7;
+  for(const sgn of [-1,1]) for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(x+sgn*2.4,y-6.6+bob+i*1.7); ctx.lineTo(x+sgn*8.4,y-7.8+bob+i*2); ctx.stroke(); } // whiskers
+  ctx.strokeStyle='#8a5a34'; ctx.beginPath(); ctx.arc(x,y-5+bob,3.6,.2*Math.PI,.8*Math.PI); ctx.stroke(); // mouth
+  ctx.fillStyle='#e63946'; ctx.fillRect(x-5.6,y+0.4+bob,11.2,2.4);                              // collar
+  ctx.fillStyle='#ffd93b'; ctx.beginPath(); ctx.arc(x,y+3.6+bob,1.9,0,Math.PI*2); ctx.fill();   // bell
+  pill('Doraemon', x, y-33+bob);
+}
+function drawGoku(tt){
+  const [x,y,vx] = gokuPos(tt); const bob = Math.sin(tt*3)*1.6, f = vx>=0?1:-1;
+  ctx.fillStyle='#00000014'; ctx.beginPath(); ctx.ellipse(x,Math.min(y+58,256),11,3,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#ffffff88'; ctx.lineWidth=1.4;                                               // speed lines
+  for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(x-f*(15+i*3), y-4+i*5+bob); ctx.lineTo(x-f*(24+i*4), y-4+i*5+bob); ctx.stroke(); }
+  ctx.fillStyle='#ffd93bcc';                                                                    // Super Saiyan aura
+  ctx.beginPath(); for(let i=0;i<10;i++){ const a=i/10*Math.PI*2 + Math.sin(tt*24+i)*.14, r1=12.5, r2=17+Math.sin(tt*26+i*2)*2.4;
+    const px=x+Math.cos(a)*r1, py=y+Math.sin(a)*r1*.92+bob, qx=x+Math.cos(a+.3)*r2, qy=y+Math.sin(a+.3)*r2*.92+bob;
+    if(i===0) ctx.moveTo(px,py); ctx.lineTo(qx,qy); ctx.lineTo(x+Math.cos(a+.62)*r1, y+Math.sin(a+.62)*r1*.92+bob); } ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#ff8c1a'; rr(x-6.4,y-1+bob,12.8,11,4.5); ctx.fill();                           // orange gi body
+  ctx.fillStyle='#2743a6'; ctx.fillRect(x-6.4,y+4.6+bob,12.8,2.6);                              // belt
+  ctx.beginPath(); ctx.moveTo(x-3,y-1+bob); ctx.lineTo(x+3,y-1+bob); ctx.lineTo(x,y+4+bob); ctx.closePath(); ctx.fill(); // undershirt V
+  ctx.fillStyle='#ff8c1a'; ctx.beginPath(); ctx.ellipse(x-f*8,y+3+bob,3,4.6,f*.5,0,Math.PI*2); ctx.fill(); // trailing arm
+  ctx.fillStyle='#ffe0bd'; ctx.beginPath(); ctx.arc(x,y-8+bob,8,0,Math.PI*2); ctx.fill();        // face
+  ctx.fillStyle='#ffd93b';                                                                      // spiky Saiyan hair
+  for(const [dx,hh] of [[-7,9],[-4,14],[-1,17],[2.4,14.6],[5.6,10.6],[7.6,6.6]]){ ctx.beginPath();
+    ctx.moveTo(x+dx-2.4,y-12+bob); ctx.lineTo(x+dx+ (dx<0?-1.4:1.4), y-12-hh+bob); ctx.lineTo(x+dx+2.4,y-12+bob); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle='#ffd93b'; ctx.beginPath(); ctx.arc(x,y-12.4+bob,7.8,Math.PI*1.05,Math.PI*1.95); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#2b211c'; ctx.beginPath(); ctx.arc(x-2.9+f*.7,y-7.6+bob,1.15,0,Math.PI*2); ctx.arc(x+2.9+f*.7,y-7.6+bob,1.15,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#8a5a34'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x-1.6,y-3.4+bob); ctx.lineTo(x+1.8,y-3.4+bob); ctx.stroke();
+  pill('Goku SSJ', x, y-33+bob);
+}
+function drawDeco(tt, dt){ drawMessi(tt, dt); drawDoraemon(tt); drawGoku(tt); }
+function frame(){
+  const now = performance.now(), tt=(now-t0)/1000, h=hourNow();
+  const dt = Math.min(.05,(now-lastNow)/1000); lastNow = now;
+  drawGround(h);
+  const dim = f => filter!=='all' && f!==filter;
+  // homes behind villagers
+  for(const tk of TASKS){ if(!shown(tk)) continue; drawHome(tk); }
+  ctx.globalAlpha=1; drawMainHouse();
+  ctx.globalAlpha=1;
+  // player "you" — teal hoodie, plaza center
+  const pb = Math.sin(tt*2)*1;
+  villager(212,154,'#2ec4b6',{bob:pb,type:1}); pill('you',212,130+pb);
+  // villagers sorted by y
+  const sorted=[...TASKS].sort((a,b)=>a.y-b.y);
+  for(const tk of sorted){ if(!shown(tk)) continue;
+    const [x,y,mode]=posOf(tk,tt); const walking = mode==='work'||mode==='run'||mode==='back';
+    const bob = mode==='run'||mode==='back' ? Math.abs(Math.sin(tt*11+tk.x))*2 : (walking? Math.abs(Math.sin(tt*6+tk.x))*1.6 : Math.sin(tt*1.6+tk.x)*.6);
+    const opts={bob};
+    if(tk.st==='live' && mode==='work') opts.tool = (Math.floor(tt+tk.x)%2? '✨':'🔨');
+    if(tk.st==='idle' && mode==='fish') opts.fish = true;
+    opts.type = TASKS.indexOf(tk)%3; opts.swing = walking;
+    villager(x,y,tk.color,opts);
+    pill(tk.short,x,y-25+bob);
+    const phase = Math.floor(tt/4 + tk.x) % 3;
+    if(tk.st==='wait' && phase===0) { ctx.font='11px sans-serif'; ctx.textAlign='center'; ctx.fillText('❗',x+13,y-18+bob); }
+    if(tk.st==='done') { ctx.font='9px sans-serif'; ctx.textAlign='center'; ctx.fillText('💤',x+12,y-18+Math.sin(tt+tk.x)); }
+    if(mode==='run'){ ctx.font='10px sans-serif'; ctx.textAlign='center'; ctx.fillText('💨',x-13,y+4); }
+    if(mode==='back'){ ctx.font='10px sans-serif'; ctx.textAlign='center'; ctx.fillText('📨',x,y-32+bob); }
+    if(mode==='fetch') bubble('📥 lấy dữ liệu…', x, y-36+bob);
+    else if(selected===tk || (tk.st==='live' && phase===1 && mode==='work')) bubble(CHATTER[tk.st][Math.floor(tk.x)%CHATTER[tk.st].length], x, y-36+bob);
+    if(selected===tk){ ctx.strokeStyle='#ff5964'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(x,y+13,13,5,0,0,Math.PI*2); ctx.stroke(); }
+    ctx.globalAlpha=1;
+  }
+  drawDeco(tt, dt);
+  if(isNight(h)){ ctx.fillStyle='#16294d33'; ctx.fillRect(0,0,480,270); }
+  requestAnimationFrame(frame);
+}
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',2600); }
+function select(tk){
+  selected=tk; blip(tk.st==='live'?880: tk.st==='done'?440:660);
+  const [label,cls]=STXT[tk.st];
+  const card=document.getElementById('card');
+  card.innerHTML = `<button id="cardClose" title="Đóng thẻ task">✕</button><span class="dot" style="background:${tk.color}"></span><span class="pill ${cls}">${label}</span>
+    <h2>${tk.name}</h2><p><b>Đang làm:</b> ${tk.doing}</p>
+    <p><b>Cuộc trò chuyện:</b> “${tk.chat}”</p>
+    <button id="openBtn">💬 Mở cuộc trò chuyện này</button>
+    <p class="small">Bấm nút sẽ copy câu “Mở task ${tk.short}” — dán vào chat Muse, mình mở đúng chat “${tk.chat}” lên cho bạn.</p>`;
+  card.classList.add('show');
+  document.getElementById('cardClose').onclick=()=>{ selected=null; card.classList.remove('show'); blip(392); };
+  document.getElementById('openBtn').onclick=async ()=>{
+    const cmd = `Mở cuộc trò chuyện của task "${tk.name}" (chat: ${tk.chat})`;
+    try{ await navigator.clipboard.writeText(cmd); toast('📋 Đã copy — dán vào chat Muse để mở ngay'); }
+    catch(e){ toast('Chat: '+tk.chat); }
+  };
+  document.querySelectorAll('#roster tbody tr').forEach(r=>r.style.background = r.dataset.short===tk.short ? '#ffe9b8':'');
+}
+cv.addEventListener('click', e=>{
+  const r=cv.getBoundingClientRect(), x=(e.clientX-r.left)*480/r.width, y=(e.clientY-r.top)*270/r.height;
+  const _tt=(performance.now()-t0)/1000, _dp=doraPos(_tt), _gp=gokuPos(_tt);
+  if(Math.hypot(messi.x-x, messi.y-y)<17){ toast('⚽ Messi chỉ ghé đảo đá bóng trang trí thôi, không phải task'); blip(740); return; }
+  if(Math.hypot(_dp[0]-x, _dp[1]-y)<19){ toast('🐱 Doraemon đang bay chong chóng tre — khách trang trí, không phải task'); blip(820); return; }
+  if(Math.hypot(_gp[0]-x, _gp[1]-y)<19){ toast('🟡 Goku Super Saiyan đang bay luyện công — khách trang trí, không phải task'); blip(880); return; }
+  let best=null,bd=1e9; const tt=(performance.now()-t0)/1000;
+  for(const tk of TASKS){ if(!shown(tk)) continue; const [vx,vy]=posOf(tk,tt); const d=(vx-x)**2+((vy-y)*1.4)**2; if(d<bd){bd=d;best=tk;} }
+  if(best && bd<500) select(best);
+  else if(Math.hypot(212-x,154-y)<16) toast('Đó là bạn — player “you”, không phải task 😊');
+  else { selected=null; document.getElementById('card').classList.remove('show'); }
+});
+// roster table
+const tb=document.querySelector('#roster tbody');
+for(const tk of TASKS){ const tr=document.createElement('tr'); tr.dataset.short=tk.short;
+  tr.innerHTML=`<td><span class="dot" style="background:${tk.color}"></span><b>${tk.short}</b><br><span class="small">${tk.name}</span> ${tk.tag?`<span class="pill ${tk.tag==="daily"?"live":"idle"}">${tk.tag==="daily"?"🗓 Hằng ngày":"🆕 Mới"}</span>`:""}</td>
+  <td><span class="pill ${STXT[tk.st][1]}">${STXT[tk.st][0]}</span></td><td>${tk.doing}</td><td>${tk.chat}</td>`;
+  tr.onclick=()=>{ select(tk); document.getElementById('stage').scrollIntoView({behavior:'smooth',block:'center'}); };
+  tb.appendChild(tr); }
+document.getElementById('showAllBtn').onclick=(e)=>{ showAll=!showAll;
+  e.target.textContent = showAll? '🙈 Thu gọn (daily + mới)' : '👀 Show all (26)';
+  toast(showAll? 'Hiện tất cả 26 task' : 'Chỉ hiện 10 task hằng ngày + mới'); blip(showAll?760:520); };
+document.querySelectorAll('.chip[data-f]').forEach(c=>c.onclick=()=>{ document.querySelectorAll('.chip[data-f]').forEach(o=>o.classList.remove('on'));
+  c.classList.add('on'); filter=c.dataset.f; blip(520);
+  if(selected && !shown(selected)){ selected=null; document.getElementById('card').classList.remove('show'); } });
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
