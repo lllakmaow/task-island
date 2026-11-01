@@ -32,7 +32,7 @@
 // Island data — minimal: labels + status only, no details.
 const TASKS = [
  // CozyWoodLab zone (top-left)
- {short:"Blog Cozy", tag:"daily", st:"idle", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
+ {short:"Blog Cozy", tag:"daily", st:"wait", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
   },
  {short:"Clip FB+Pin", tag:"daily", st:"wait", color:"#f2cc8f", x:128, y:58, wx:140, wy:88,
   },
@@ -50,9 +50,9 @@ const TASKS = [
  {short:"Elon·CZ·Trump", tag:"daily", st:"live", color:"#ef476f", x:118, y:186, wx:132, wy:170,
   },
  // CraftNameSign zone (top-right)
- {short:"Pin CraftName", tag:"new", st:"wait", color:"#e76f51", x:308, y:60, wx:322, wy:88,
+ {short:"Pin CraftName", st:"live", color:"#e76f51", x:308, y:60, wx:322, wy:88,
   },
- {short:"Tách Category", tag:"new", st:"wait", color:"#2a9d8f", x:360, y:56, wx:372, wy:84,
+ {short:"Tách Category", st:"wait", color:"#2a9d8f", x:360, y:56, wx:372, wy:84,
   },
  {short:"Clone Catalog", st:"wait", color:"#e9c46a", x:412, y:66, wx:420, wy:92,
   },
@@ -75,10 +75,10 @@ const TASKS = [
   },
  {short:"Ảnh Spry Warm", st:"wait", color:"#ffb703", x:434, y:214, wx:428, wy:196,
   },
- {short:"CS Lynseriess", tag:"daily", st:"live", color:"#3a86ff", x:452, y:176, wx:458, wy:196,
+ {short:"CS Lynseriess", tag:"daily", st:"wait", color:"#3a86ff", x:452, y:176, wx:458, wy:196,
   },
  // Misc / center
- {short:"Đảo Task", tag:"new", st:"wait", color:"#118ab2", x:292, y:140, wx:278, wy:154,
+ {short:"Đảo Task", tag:"new", st:"live", color:"#118ab2", x:292, y:140, wx:278, wy:154,
   },
  {short:"BodyJourney", st:"wait", color:"#06d6a0", x:292, y:82, wx:280, wy:100,
   },
@@ -86,7 +86,7 @@ const TASKS = [
   },
  {short:"Báo Cáo Tháng", st:"wait", color:"#c77dff", x:252, y:224, wx:262, wy:206,
   },
- {short:"Clip TikTok", tag:"new", st:"wait", color:"#ff477e", x:446, y:120, wx:452, wy:140,
+ {short:"Clip TikTok", tag:"new", st:"idle", color:"#ff477e", x:446, y:120, wx:452, wy:140,
   },
  // Done corner
  {short:"Drive Ethan ✓", st:"done", color:"#adb5bd", x:52, y:238, wx:52, wy:238,
