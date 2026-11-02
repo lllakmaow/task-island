@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muse làm việc như thế nào? — Main chat, Side chat và Team phân quyền</title>
+<meta name="description" content="Cẩm nang cho người mới: Muse vận hành như một công ty nhỏ 3 lớp — Main chat là xương sống trí nhớ chung, mỗi Side chat là một phòng ban, và trong mỗi phòng là một team phân quyền rõ ràng.">
+<style>
+  :root{
+    --paper:#FAF6EE;
+    --card:#FFFFFF;
+    --ink:#22312B;
+    --muted:#5C6B63;
+    --emerald:#0B5B4A;
+    --emerald-dark:#084434;
+    --emerald-tint:#E4EFE7;
+    --amber:#E39A2D;
+    --amber-tint:#F7ECD4;
+    --line:#E3DCCB;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.65;
+    font-size:17px;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  /* ---------- Hero ---------- */
+  header{
+    background:linear-gradient(160deg,var(--emerald) 0%,var(--emerald-dark) 100%);
+    color:#FDFBF5;
+    padding:64px 0 56px;
+  }
+  .badge{
+    display:inline-block;background:var(--amber);color:#2A1E05;
+    font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 14px;border-radius:999px;margin-bottom:20px;
+  }
+  header h1{font-size:42px;line-height:1.2;font-weight:800;max-width:640px}
+  header p.lead{margin-top:18px;font-size:19px;color:#DDEAE0;max-width:680px}
+  header .sign{margin-top:26px;font-size:15px;color:#BFD6C6}
+  header .sign strong{color:#fff}
+  /* ---------- Sections ---------- */
+  section{padding:52px 0 8px}
+  h2{font-size:29px;font-weight:800;color:var(--emerald-dark);margin-bottom:10px}
+  h2 .no{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:38px;height:38px;border-radius:50%;
+    background:var(--amber);color:#2A1E05;font-size:18px;margin-right:10px;vertical-align:middle;
+  }
+  .sub{color:var(--muted);max-width:720px;margin-bottom:28px}
+  h3{font-size:20px;font-weight:700;margin-bottom:8px;color:var(--ink)}
+  p{margin-bottom:12px}
+  /* ---------- Diagram ---------- */
+  .diagram{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:30px 26px;margin:8px 0 10px;
+  }
+  .d-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  .d-box{
+    border-radius:12px;padding:14px 18px;text-align:center;flex:1 1 180px;max-width:280px;
+    border:1.5px solid var(--line);background:var(--paper);
+  }
+  .d-box b{display:block;font-size:16px}
+  .d-box span{font-size:13.5px;color:var(--muted)}
+  .d-box.you{background:var(--amber-tint);border-color:var(--amber)}
+  .d-box.main{background:var(--emerald);border-color:var(--emerald);color:#fff}
+  .d-box.main span{color:#CFE3D4}
+  .d-box.side{background:var(--emerald-tint);border-color:var(--emerald)}
+  .d-arrow{text-align:center;font-size:22px;color:var(--amber);line-height:1.4;font-weight:800}
+  .d-label{text-align:center;font-size:13px;color:var(--muted);margin:2px 0 6px}
+  /* ---------- Cards ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin:18px 0 8px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 18px;
+  }
+  .card .ico{font-size:26px;margin-bottom:8px}
+  .card h3{font-size:17px}
+  .card p{font-size:15px;color:var(--muted);margin:0}
+  /* ---------- Steps ---------- */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:18px 0 8px}
+  .step{
+    background:var(--emerald-tint);border-radius:var(--radius);padding:18px 16px;position:relative;
+  }
+  .step .n{
+    display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;
+    background:var(--emerald);color:#fff;border-radius:50%;font-weight:800;font-size:15px;margin-bottom:8px;
+  }
+  .step h3{font-size:16px}
+  .step p{font-size:14.5px;color:var(--muted);margin:0}
+  /* ---------- Role tables ---------- */
+  .team{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px;margin:18px 0 10px;
+  }
+  .team h3{font-size:21px;color:var(--emerald-dark)}
+  .team .intro{color:var(--muted);font-size:15.5px;margin-bottom:16px}
+  .role{display:flex;gap:14px;padding:12px 0;border-top:1px dashed var(--line)}
+  .role:first-of-type{border-top:none}
+  .role .tag{
+    flex:0 0 auto;align-self:flex-start;background:var(--emerald);color:#fff;
+    font-weight:700;font-size:13.5px;padding:4px 12px;border-radius:999px;white-space:nowrap;
+  }
+  .role .tag.alt{background:var(--amber);color:#2A1E05}
+  .role p{margin:0;font-size:15.5px}
+  .role p b{color:var(--ink)}
+  .gate{
+    margin-top:16px;background:var(--amber-tint);border-left:5px solid var(--amber);
+    border-radius:10px;padding:14px 18px;font-size:15.5px;
+  }
+  /* ---------- Demo ---------- */
+  .demo{
+    background:var(--emerald-dark);color:#EDF4EE;border-radius:var(--radius);
+    padding:28px 26px;margin:18px 0 10px;
+  }
+  .demo h3{color:#fff;font-size:21px}
+  .demo p{color:#C4D8C9;font-size:15.5px}
+  .demo .btns{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+  .demo button{
+    background:transparent;border:1.5px solid var(--amber);color:#F5C877;
+    font-size:15px;font-weight:700;padding:10px 16px;border-radius:999px;cursor:pointer;
+    font-family:inherit;
+  }
+  .demo button:hover,.demo button.active{background:var(--amber);color:#2A1E05}
+  .demo .route{
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);
+    border-radius:12px;padding:16px 18px;font-size:15.5px;color:#EDF4EE;min-height:76px;
+  }
+  /* ---------- Rules ---------- */
+  .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:18px 0 8px}
+  .rule{
+    background:var(--card);border:1px solid var(--line);border-left:6px solid var(--emerald);
+    border-radius:12px;padding:18px;
+  }
+  .rule h3{font-size:16.5px}
+  .rule p{font-size:15px;color:var(--muted);margin:0}
+  /* ---------- Footer ---------- */
+  footer{
+    margin-top:56px;background:var(--emerald-dark);color:#C4D8C9;
+    padding:34px 0;font-size:14.5px;text-align:center;
+  }
+  footer strong{color:#fff}
+  @media (max-width:640px){
+    header h1{font-size:32px}
+    h2{font-size:24px}
+    section{padding:40px 0 4px}
+    .role{flex-direction:column;gap:6px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="badge">Cẩm nang cho người mới</span>
+    <h1>Muse làm việc như thế nào?</h1>
+    <p class="lead">Xin chào, mình là <strong>Muse</strong> — trợ lý AI cá nhân. Để làm được nhiều việc cùng lúc mà không rối, mình vận hành như một công ty nhỏ gồm 3 lớp: một trung tâm điều phối, nhiều phòng ban chuyên trách, và trong mỗi phòng là một đội được phân quyền rõ ràng.</p>
+    <p class="sign">Đọc xong trang này, bạn sẽ biết: việc nào nói ở đâu, ai phụ trách, và kết quả quay về bằng cách nào.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Sơ đồ tổng thể</h2>
+    <p class="sub">Mọi việc đều bắt đầu từ bạn, đi qua trung tâm để được ghi nhớ và điều phối, rồi xuống đúng phòng ban và đúng người phụ trách.</p>
+    <div class="diagram">
+      <div class="d-row">
+        <div class="d-box you"><b>Bạn</b><span>Người giao việc và duyệt cuối cùng</span></div>
+      </div>
+      <div class="d-arrow">↓</div>
+      <div class="d-row">
+        <div class="d-box main"><b>Main Chat</b><span>Trung tâm: trí nhớ chung + điều phối toàn bộ</span></div>
+      </div>
+      <div class="d-arrow">↓</div>
+      <div class="d-label">Mỗi mảng việc một phòng riêng</div>
+      <div class="d-row">
+        <div class="d-box side"><b>Side Chat A</b><span>Phòng nội dung</span></div>
+        <div class="d-box side"><b>Side Chat B</b><span>Phòng chăm sóc khách hàng</span></div>
+        <div class="d-box side"><b>Side Chat C</b><span>Phòng dự án</span></div>
+      </div>
+      <div class="d-arrow">↓</div>
+      <div class="d-label">Bên trong mỗi phòng là một team phân quyền</div>
+      <div class="d-row">
+        <div class="d-box"><b>@Lead</b><span>Đầu mối duy nhất</span></div>
+        <div class="d-box"><b>Các vai chuyên môn</b><span>Mỗi người một khâu</span></div>
+        <div class="d-box"><b>@QA</b><span>Kiểm tra, có quyền chặn</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">1</span>Main Chat — xương sống trí nhớ chung</h2>
+    <p class="sub">Main Chat là cuộc trò chuyện chính, nơi mọi thứ quan trọng được nối lại với nhau. Hãy hình dung đây là văn phòng tổng giám đốc kiêm bộ nhớ của cả hệ thống.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ico">🧠</div>
+        <h3>Trí nhớ chung</h3>
+        <p>Mọi quyết định, sở thích và quy tắc bạn đã chốt được lưu tại đây. Bạn chỉ cần nói một lần — các phòng ban khác đều làm việc trên cùng nền trí nhớ đó, không phải nhắc lại.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🧭</div>
+        <h3>Điều phối chung</h3>
+        <p>Main Chat quản lý chung tất cả Side Chat: biết phòng nào đang làm gì, việc nào xong, việc nào đang chờ bạn quyết.</p>
+      </div>
+      <div class="card">
+        <div class="ico">✅</div>
+        <h3>Nơi chốt quyết định lớn</h3>
+        <p>Những việc ảnh hưởng nhiều phòng ban, hoặc cần bạn duyệt ở tầm tổng thể, đều được đưa về Main Chat để chốt một lần.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🔭</div>
+        <h3>Nhìn toàn cảnh</h3>
+        <p>Khi bạn chỉ muốn hỏi "mọi việc tới đâu rồi?", cứ hỏi ở Main Chat. Đây là nơi duy nhất thấy được bức tranh toàn bộ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">2</span>Side Chat — mỗi phòng ban một mảng việc</h2>
+    <p class="sub">Mỗi Side Chat là một cuộc trò chuyện riêng, chuyên trách một mảng việc. Tách phòng như vậy giúp công việc không bị lẫn: chuyện của phòng này không tràn sang phòng kia, và mỗi phòng giữ được ngữ cảnh sâu của lĩnh vực mình phụ trách.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ico">✍️</div>
+        <h3>Phòng nội dung</h3>
+        <p>Chuyên viết và đăng bài: chọn đề tài, soạn nháp, chuẩn bị ảnh, chờ duyệt rồi đăng. Ví dụ minh họa chi tiết ở phần đội đăng blog phía dưới.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🎬</div>
+        <h3>Phòng sản xuất video</h3>
+        <p>Chuyên xử lý video: tìm nguồn, cắt dựng, làm phụ đề, kiểm tra và đăng. Ví dụ minh họa chi tiết ở phần đội cắt clip phía dưới.</p>
+      </div>
+      <div class="card">
+        <div class="ico">💬</div>
+        <h3>Phòng chăm sóc khách hàng</h3>
+        <p>Chuyên đọc thư, theo dõi đơn hàng và soạn sẵn câu trả lời để bạn duyệt trước khi gửi cho khách.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🗂️</div>
+        <h3>Phòng dự án</h3>
+        <p>Mỗi dự án lớn có phòng riêng: mục tiêu, dữ liệu và tiến độ nằm gọn trong đó, chạy dài ngày cũng không thất lạc.</p>
+      </div>
+    </div>
+    <div class="gate"><b>Nguyên tắc tách phòng:</b> một mảng việc — một Side Chat. Khi một việc mới đủ lớn và lặp lại hằng ngày, nó xứng đáng có phòng riêng thay vì chen vào Main Chat.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">3</span>Team phân quyền — trong mỗi phòng, ai làm gì</h2>
+    <p class="sub">Một phòng ban hiệu quả không phải là một người làm tất cả, mà là một đội: một người lead làm đầu mối, các thành viên chia nhau từng khâu, và một người kiểm tra chất lượng ở cuối.</p>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><h3>Bạn giao việc</h3><p>Bạn chỉ cần nói mục tiêu với @Lead, bằng lời thường ngày.</p></div>
+      <div class="step"><span class="n">2</span><h3>@Lead chia việc</h3><p>Lead bẻ mục tiêu thành từng khâu và giao đúng người phụ trách.</p></div>
+      <div class="step"><span class="n">3</span><h3>Từng vai làm phần mình</h3><p>Mỗi thành viên chỉ tập trung vào khâu của mình, làm xong chuyền tiếp.</p></div>
+      <div class="step"><span class="n">4</span><h3>@QA kiểm tra</h3><p>Người kiểm tra soi lại toàn bộ; chưa đạt là chặn, không cho qua.</p></div>
+      <div class="step"><span class="n">5</span><h3>Báo cáo gộp một lần</h3><p>Lead tổng hợp kết quả thành một báo cáo duy nhất gửi bạn duyệt.</p></div>
+    </div>
+    <div class="gate"><b>Điểm mấu chốt:</b> bạn chỉ nói chuyện với <b>@Lead</b>. Bạn không cần nhớ ai làm khâu nào — Lead chịu trách nhiệm theo dõi, đôn đốc và báo cáo thay cho cả đội.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Ví dụ 1 — Đội cắt clip TikTok</h2>
+    <p class="sub">Một đội thật theo đúng mô hình trên: nhận video dài, cắt thành các clip ngắn dọc 9:16 có phụ đề tiếng Việt để đăng TikTok.</p>
+    <div class="team">
+      <h3>Đội hình 7 vai</h3>
+      <p class="intro">Đầu mối duy nhất của bạn trong đội này là @ClipLead. Sáu vai còn lại chạy như một dây chuyền sản xuất.</p>
+      <div class="role"><span class="tag">@ClipLead</span><p><b>Đầu mối duy nhất.</b> Nhận việc từ bạn, chia khâu cho cả đội, kiểm tra chất lượng cuối và báo cáo gộp một lần.</p></div>
+      <div class="role"><span class="tag alt">@Scout</span><p><b>Tìm và chọn đoạn.</b> Tải video nguồn, làm bản ghi lời thoại (transcript), chọn ra các đoạn hay nhất — đoạn mở đầu gây tò mò, cao trào, câu chốt — mỗi đoạn trọn ý khoảng 15–60 giây.</p></div>
+      <div class="role"><span class="tag alt">@Cutter</span><p><b>Cắt và dựng khung.</b> Cắt đúng đoạn đã chọn, dựng lại thành khung dọc 9:16 theo chủ thể, giữ hình không bị bóp méo.</p></div>
+      <div class="role"><span class="tag alt">@Subber</span><p><b>Làm phụ đề.</b> Dịch và biên tập phụ đề tiếng Việt ngắn gọn, dễ đọc, tối đa 2 dòng mỗi lượt thoại.</p></div>
+      <div class="role"><span class="tag alt">@Stylist</span><p><b>Hoàn thiện hình ảnh.</b> Gắn phụ đề vào video, canh vị trí phụ đề trong vùng an toàn của TikTok, tô điểm từ khóa nổi bật.</p></div>
+      <div class="role"><span class="tag alt">@QA-TikTok</span><p><b>Kiểm tra chất lượng.</b> Soi lại khung hình, phụ đề và nội dung trước khi đăng — có quyền chặn nếu clip chưa đạt.</p></div>
+      <div class="role"><span class="tag alt">@TikTok-Ops</span><p><b>Đăng bài.</b> Đưa clip đạt chuẩn lên kênh, kèm tiêu đề và ảnh bìa riêng cho từng clip.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Ví dụ 2 — Đội đăng blog</h2>
+    <p class="sub">Đội thứ hai minh họa một điểm khác của mô hình: phân quyền kết hợp cổng duyệt — cả đội làm sẵn mọi thứ, nhưng bài chỉ lên sóng sau một lần duyệt của bạn.</p>
+    <div class="team">
+      <h3>Đội hình 5 vai</h3>
+      <p class="intro">Mỗi ngày, đội chuẩn bị sẵn một lô bài nháp hoàn chỉnh để bạn xem một lượt.</p>
+      <div class="role"><span class="tag">@Blog-Lead</span><p><b>Đầu mối duy nhất.</b> Nhận chủ đề và số lượng bài, điều phối cả đội, gom nháp thành một lô trình bạn duyệt.</p></div>
+      <div class="role"><span class="tag alt">@Scout</span><p><b>Chọn bài nguồn.</b> Nghiên cứu và chọn các bài viết nguồn chất lượng, tránh trùng với bài đã đăng.</p></div>
+      <div class="role"><span class="tag alt">@Writer</span><p><b>Viết nháp.</b> Viết lại thành bài hoàn chỉnh theo đúng format của trang: đoạn mở đầu, ý chính, bảng so sánh, mẹo thực hành.</p></div>
+      <div class="role"><span class="tag alt">@Media</span><p><b>Chuẩn bị ảnh.</b> Làm ảnh minh họa đúng kích thước cho từng bài.</p></div>
+      <div class="role"><span class="tag alt">@Publisher</span><p><b>Đăng và chia sẻ.</b> Sau khi được duyệt: đăng bài lên website và chia sẻ sang các kênh mạng xã hội kèm sẵn.</p></div>
+      <div class="gate"><b>Cổng duyệt một lần:</b> nháp được chuẩn bị sẵn trong ngày, đến giờ hẹn đội trình cả lô — bạn chỉ cần trả lời "Duyệt" là toàn bộ được đăng. Không duyệt thì không bài nào lên sóng.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Thử ngay — một việc sẽ đi đường nào?</h2>
+    <p class="sub">Bấm thử một tình huống để xem cách hệ thống định tuyến công việc.</p>
+    <div class="demo">
+      <h3>Demo định tuyến</h3>
+      <p>Chọn một việc mẫu:</p>
+      <div class="btns">
+        <button data-route="blog">Chuẩn bị bài blog hôm nay</button>
+        <button data-route="clip">Cắt clip TikTok từ video dài</button>
+        <button data-route="general">Hỏi một việc chung, chưa rõ thuộc phòng nào</button>
+      </div>
+      <div class="route" id="routeBox">Bấm một nút ở trên để xem đường đi của việc đó.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5 quy tắc vàng</h2>
+    <p class="sub">Nắm 5 điều này là bạn dùng hệ thống trơn tru như người cũ.</p>
+    <div class="rules">
+      <div class="rule"><h3>1. Một mảng việc, một Side Chat</h3><p>Việc thuộc phòng nào thì nói ở phòng đó. Đừng giao việc của phòng nội dung trong phòng chăm sóc khách hàng.</p></div>
+      <div class="rule"><h3>2. Chỉ nói với @Lead</h3><p>Trong mỗi phòng, bạn chỉ giao việc và nhận báo cáo qua một đầu mối duy nhất. Cả đội phía sau do Lead điều phối.</p></div>
+      <div class="rule"><h3>3. Nói một lần, hệ thống nhớ lâu</h3><p>Quy tắc bạn đã chốt ở bất kỳ đâu cũng được ghi vào trí nhớ chung và áp dụng nhất quán ở mọi phòng.</p></div>
+      <div class="rule"><h3>4. Duyệt một lần cho cả gói</h3><p>Việc lặp lại hằng ngày được chuẩn bị thành lô và trình duyệt một lần, thay vì hỏi bạn từng bước nhỏ.</p></div>
+      <div class="rule"><h3>5. Quy tắc đã chốt thì chạy đến cùng</h3><p>Khi một hàng việc đã rõ quy trình, đội tự chạy liên tục đến hết và chỉ báo khi xong — hoặc khi gặp điểm thật sự cần bạn quyết định.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Bắt đầu một việc mới trong 3 bước</h2>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><h3>Mở một Side Chat mới</h3><p>Đặt tên theo mảng việc, ví dụ "Phòng đăng blog" hay "Dự án ra mắt sản phẩm".</p></div>
+      <div class="step"><span class="n">2</span><h3>Nói mục tiêu của bạn</h3><p>Chỉ cần nói bạn muốn đạt điều gì. Muse sẽ đề xuất đội hình và cách phân vai.</p></div>
+      <div class="step"><span class="n">3</span><h3>Chốt đội hình và để đội chạy</h3><p>Bạn duyệt đội hình một lần; từ đó cứ nói với @Lead, nhận báo cáo gộp và duyệt ở các cổng đã hẹn.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <strong>Muse</strong> — Main Chat là trung tâm, Side Chat là phòng ban, Team phân quyền là cách mỗi phòng làm việc.<br>
+    Nói đúng nơi, với đúng người — phần còn lại để Muse lo.
+  </div>
+</footer>
+
+<script>
+  var routes = {
+    blog: "Việc “chuẩn bị bài blog” đi vào Side Chat của phòng nội dung → @Blog-Lead nhận và chia việc: @Scout chọn bài nguồn, @Writer viết nháp, @Media làm ảnh → đến giờ hẹn, cả lô nháp được trình bạn duyệt một lần → duyệt xong @Publisher mới đăng và chia sẻ.",
+    clip: "Việc “cắt clip TikTok” đi vào Side Chat của phòng sản xuất video → @ClipLead chia việc: @Scout chọn đoạn hay, @Cutter dựng khung 9:16, @Subber và @Stylist hoàn thiện phụ đề → @QA-TikTok kiểm tra → đạt chuẩn thì @TikTok-Ops đăng.",
+    general: "Việc chưa rõ thuộc phòng nào cứ nói ở Main Chat. Muse đối chiếu trí nhớ chung, tự định tuyến xuống đúng Side Chat — hoặc đề xuất mở một phòng mới nếu đó là mảng việc lặp lại. Bạn không cần tự phân loại."
+  };
+  var box = document.getElementById('routeBox');
+  var buttons = document.querySelectorAll('.demo button');
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      buttons.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      box.textContent = routes[btn.getAttribute('data-route')];
+    });
+  });
+</script>
+
+</body>
+</html>
