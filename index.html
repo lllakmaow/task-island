@@ -32,7 +32,7 @@
 // Island data — minimal: labels + status only, no details.
 const TASKS = [
  // CozyWoodLab zone (top-left)
- {short:"Blog Cozy", tag:"daily", st:"idle", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
+ {short:"Blog Cozy", tag:"daily", st:"wait", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
   },
  {short:"Clip FB+Pin", tag:"daily", st:"wait", color:"#f2cc8f", x:128, y:58, wx:140, wy:88,
   },
@@ -44,7 +44,7 @@ const TASKS = [
   },
  {short:"Ảnh Cozy", st:"idle", color:"#b8b8d8", x:172, y:120, wx:120, wy:196,
   },
- {short:"Pin Shop Cozy", tag:"new", st:"live", color:"#fb8500", x:88, y:150, wx:96, wy:168,
+ {short:"Pin Shop Cozy", tag:"new", st:"idle", color:"#fb8500", x:88, y:150, wx:96, wy:168,
   },
  // Watch zone (bottom-left, by the pond/clock)
  {short:"Giá 12 Coin", tag:"daily", st:"live", color:"#ffd166", x:66, y:178, wx:84, wy:168,
@@ -52,7 +52,7 @@ const TASKS = [
  {short:"Elon·CZ·Trump", tag:"daily", st:"live", color:"#ef476f", x:118, y:186, wx:132, wy:170,
   },
  // CraftNameSign zone (top-right)
- {short:"Pin CraftName", st:"live", color:"#e76f51", x:308, y:60, wx:322, wy:88,
+ {short:"Pin CraftName", st:"idle", color:"#e76f51", x:308, y:60, wx:322, wy:88,
   },
  {short:"Tách Category", st:"wait", color:"#2a9d8f", x:360, y:56, wx:372, wy:84,
   },
@@ -62,7 +62,7 @@ const TASKS = [
   },
  {short:"Video Gallery", st:"wait", color:"#9b5de5", x:368, y:118, wx:380, wy:130,
   },
- {short:"Redirect 404", tag:"new", st:"live", color:"#5a189a", x:420, y:112, wx:428, wy:132,
+ {short:"Redirect 404", tag:"new", st:"idle", color:"#5a189a", x:420, y:112, wx:428, wy:132,
   },
  // Glowneon / Lynseriess zone (bottom-right)
  {short:"Cây Glowneon", st:"wait", color:"#588157", x:300, y:182, wx:314, wy:168,
@@ -100,6 +100,16 @@ const TASKS = [
  {short:"Drive Ethan ✓", st:"done", color:"#adb5bd", x:52, y:238, wx:52, wy:238,
   },
  {short:"White-fill ✓", st:"done", color:"#adb5bd", x:92, y:244, wx:92, wy:244,
+  },
+ {short:"Team Nail", tag:"new", st:"wait", color:"#ff70a6", x:238, y:150, wx:248, wy:168,
+  },
+ {short:"Stripe Dispute", tag:"new", st:"wait", color:"#e63946", x:470, y:100, wx:474, wy:120,
+  },
+ {short:"Portfolio", tag:"new", st:"wait", color:"#4361ee", x:150, y:244, wx:150, wy:244,
+  },
+ {short:"CS DOT-2", tag:"new", st:"wait", color:"#2ec4b6", x:232, y:58, wx:240, wy:84,
+  },
+ {short:"Glow DOT-2", tag:"new", st:"wait", color:"#ff9f1c", x:268, y:196, wx:276, wy:182,
   },
 ];
 const CHATTER = {live:["ping!","có tin mới!","đang làm nè!"], wait:["chờ bạn đó!","duyệt giúp mình?","mình sẵn sàng rồi!"], idle:["thong thả thôi…","chờ việc tiếp…"], done:["xong rồi ✓","ngủ ngon…"]};
