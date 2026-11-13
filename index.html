@@ -32,9 +32,9 @@
 // Island data — minimal: labels + status only, no details.
 const TASKS = [
  // CozyWoodLab zone (top-left)
- {short:"Blog Cozy", tag:"daily", st:"wait", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
+ {short:"Blog Cozy", tag:"daily", st:"idle", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
   },
- {short:"Clip FB+Pin", tag:"daily", st:"wait", color:"#f2cc8f", x:128, y:58, wx:140, wy:88,
+ {short:"Clip FB+Pin", tag:"daily", st:"idle", color:"#f2cc8f", x:128, y:58, wx:140, wy:88,
   },
  {short:"Pin Tree Shelf", tag:"daily", st:"done", color:"#81b29a", x:176, y:70, wx:188, wy:96,
   },
@@ -56,7 +56,7 @@ const TASKS = [
   },
  {short:"Tách Category", st:"wait", color:"#2a9d8f", x:360, y:56, wx:372, wy:84,
   },
- {short:"Clone Catalog", st:"wait", color:"#e9c46a", x:412, y:66, wx:420, wy:92,
+ {short:"Clone Catalog", st:"idle", color:"#e9c46a", x:412, y:66, wx:420, wy:92,
   },
  {short:"JSON Chung", st:"wait", color:"#f4a261", x:316, y:112, wx:330, wy:126,
   },
@@ -81,7 +81,7 @@ const TASKS = [
   },
  {short:"Ảnh Spry Warm", st:"wait", color:"#ffb703", x:434, y:214, wx:428, wy:196,
   },
- {short:"CS Lynseriess", tag:"daily", st:"wait", color:"#3a86ff", x:452, y:176, wx:458, wy:196,
+ {short:"CS Lynseriess", tag:"daily", st:"live", color:"#3a86ff", x:452, y:176, wx:458, wy:196,
   },
  {short:"Team Lynseriess", st:"wait", color:"#ff6b6b", x:440, y:192, wx:448, wy:180,
   },
@@ -114,6 +114,8 @@ const TASKS = [
  {short:"Glow DOT-2", st:"wait", color:"#ff9f1c", x:268, y:196, wx:276, wy:182,
   },
  {short:"Ảnh Cột", st:"wait", color:"#80ed99", x:470, y:220, wx:476, wy:208,
+  },
+ {short:"Team Mockup", tag:"new", st:"wait", color:"#b5179e", x:196, y:238, wx:204, wy:222,
   },
 ];
 const CHATTER = {live:["ping!","có tin mới!","đang làm nè!"], wait:["chờ bạn đó!","duyệt giúp mình?","mình sẵn sàng rồi!"], idle:["thong thả thôi…","chờ việc tiếp…"], done:["xong rồi ✓","ngủ ngon…"]};
