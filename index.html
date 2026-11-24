@@ -32,7 +32,7 @@
 // Island data — minimal: labels + status only, no details.
 const TASKS = [
  // CozyWoodLab zone (top-left)
- {short:"Blog Cozy", tag:"daily", st:"idle", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
+ {short:"Blog Cozy", tag:"daily", st:"wait", color:"#e07a5f", x:78, y:66, wx:96, wy:92,
   },
  {short:"Clip FB+Pin", tag:"daily", st:"wait", color:"#f2cc8f", x:128, y:58, wx:140, wy:88,
   },
@@ -48,7 +48,9 @@ const TASKS = [
   },
  {short:"Poster Cozy", st:"done", color:"#ff5d8f", x:148, y:94, wx:156, wy:112,
   },
- {short:"Payment Cozy", tag:"new", st:"wait", color:"#43aa8b", x:138, y:152, wx:150, wy:166,
+ {short:"Payment Cozy", st:"wait", color:"#43aa8b", x:138, y:152, wx:150, wy:166,
+  },
+ {short:"IG Dashboard", tag:"new", st:"live", color:"#8ecae6", x:100, y:92, wx:112, wy:110,
   },
  // Watch zone (bottom-left, by the pond/clock)
  {short:"Giá 12 Coin", tag:"daily", st:"live", color:"#ffd166", x:66, y:178, wx:84, wy:168,
@@ -70,11 +72,11 @@ const TASKS = [
   },
  {short:"SEO Audit", st:"wait", color:"#7209b7", x:420, y:150, wx:428, wy:164,
   },
- {short:"Blog CNS", st:"idle", color:"#b5838d", x:392, y:88, wx:404, wy:106,
+ {short:"Blog CNS", st:"wait", color:"#b5838d", x:392, y:88, wx:404, wy:106,
   },
- {short:"Pin FB", st:"live", color:"#f15bb5", x:440, y:84, wx:452, wy:106,
+ {short:"Pin FB", st:"idle", color:"#f15bb5", x:440, y:84, wx:452, wy:106,
   },
- {short:"Homepage CNS", tag:"new", st:"wait", color:"#d4a373", x:344, y:86, wx:356, wy:104,
+ {short:"Homepage CNS", st:"wait", color:"#d4a373", x:344, y:86, wx:356, wy:104,
   },
  // Glowneon / Lynseriess zone (bottom-right)
  {short:"Cây Glowneon", st:"wait", color:"#588157", x:300, y:182, wx:314, wy:168,
@@ -100,17 +102,17 @@ const TASKS = [
  {short:"Contact Us", st:"wait", color:"#f72585", x:414, y:158, wx:420, wy:176,
   },
  // Misc / center
- {short:"Đảo Task", tag:"daily", st:"live", color:"#118ab2", x:292, y:140, wx:278, wy:154,
+ {short:"Đảo Task", tag:"daily", st:"wait", color:"#118ab2", x:292, y:140, wx:278, wy:154,
   },
  {short:"BodyJourney", st:"wait", color:"#06d6a0", x:292, y:82, wx:280, wy:100,
   },
  {short:"Team Etsy", tag:"daily", st:"wait", color:"#8338ec", x:210, y:120, wx:220, wy:140,
   },
- {short:"Truy Nguồn Clip", st:"wait", color:"#8d99ae", x:206, y:196, wx:220, wy:182,
+ {short:"Truy Nguồn Clip", st:"idle", color:"#8d99ae", x:206, y:196, wx:220, wy:182,
   },
  {short:"Báo Cáo Tháng", st:"wait", color:"#c77dff", x:252, y:224, wx:262, wy:206,
   },
- {short:"Clip TikTok", st:"live", color:"#ff477e", x:446, y:120, wx:452, wy:140,
+ {short:"Clip TikTok", st:"idle", color:"#ff477e", x:446, y:120, wx:452, wy:140,
   },
  // Done corner
  {short:"Drive Ethan ✓", st:"done", color:"#adb5bd", x:52, y:238, wx:52, wy:238,
